@@ -20,14 +20,11 @@
        (join "|")
        re-pattern))
 
-(defn- convert-case [first-fn rest-fn separator s & [p]]
+(defn- convert-case [first-fn rest-fn separator [word & more]]
   "Converts the case of a string s according to the rule for the first
   word, remaining words, and the separator. Optionally, accepts a pattern
   for word separation."
-  (-> s
-      (split (if p p word-separator-pattern))
-      ((fn [[word & more]]
-         (join separator (cons (first-fn word) (map rest-fn more)))))))
+  (join separator (cons (first-fn word) (map rest-fn more))))
 
 ;;; TODO: Set up in loop to prevent mistakes
 (def ^:private case-conversion-rules
@@ -73,7 +70,9 @@
                  {:doc doc
                   :arglists '([s & re])})
           (fn [s & [re]]
-            (convert-case first-fn rest-fn separator s re))))
+            (let [words (split s (if re re word-separator-pattern))]
+              (convert-case first-fn rest-fn separator
+                          words)))))
 
 ;;; TODO: Is this the correct thing to do?
 ;;; Ex: (alter-name :fooBar lower-hyphen) -> :foo-bar
