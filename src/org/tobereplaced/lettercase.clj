@@ -16,7 +16,9 @@
         ;; Lowercase letter followed by uppercase letter.
         "(?<=[\\p{L}&&[^\\p{Lu}]])(?=\\p{Lu})"
         ;; Letter followed by number.  Ex: area51 -> area 51.
-        "(?<=\\p{L})(?=\\p{N})"]
+        "(?<=\\p{L})(?=\\p{N})"
+        ;; Number followed by letter
+        "(?<=\\p{N})(?=\\p{L})"]
        (join "|")
        re-pattern))
 
