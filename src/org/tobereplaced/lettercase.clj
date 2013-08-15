@@ -31,50 +31,47 @@
 ;;; TODO: Set up in loop to prevent mistakes
 (def ^:private case-conversion-rules
   "The formatting rules for each case."
-  {"camel" [capitalize capitalize ""
-            "first: capitalize\nrest: capitalize\nseparator: none"]
-   "camel-space" [capitalize capitalize " "
-                  "first: capitalize\nrest: capitalize\nseparator: space"]
-   "camel-underscore" [capitalize capitalize "_"
-                       "first: capitalize\nrest: capitalize\nseparator: underscore"]
-   "camel-hyphen" [capitalize capitalize "-"
-                   "first: capitalize\nrest: capitalize\nseparator: dash"]
-   "mixed" [lower-case capitalize ""
-            "first: lower-case\nrest: capitalize\nseparator: none"]
-   "mixed-space" [lower-case capitalize " "
-                  "first: lower-case\nrest: capitalize\nseparator: space"]
-   "mixed-underscore" [lower-case capitalize "_"
-                       "first: lower-case\nrest: capitalize\nseparator: underscore"]
-   "mixed-hyphen" [lower-case capitalize "-"
-                   "first: lower-case\nrest: capitalize\nseparator: dash"]
-   "upper" [upper-case upper-case ""
-            "first: upper-case\nrest: upper-case\nseparator: none"]
-   "upper-space" [upper-case upper-case " "
-                  "first: upper-case\nrest: upper-case\nseparator: space"]
-   "upper-underscore" [upper-case upper-case "_"
-                       "first: upper-case\nrest: upper-case\nseparator: underscore"]
-   "upper-hyphen" [upper-case upper-case "-"
-                   "first: upper-case\nrest: upper-case\nseparator: dash"]
-   "lower" [lower-case lower-case ""
-            "first: lower-case\nrest: lower-case\nseparator: none"]
-   "lower-space" [lower-case lower-case " "
-                  "first: lower-case\nrest: lower-case\nseparator: space"]
-   "lower-underscore" [lower-case lower-case "_"
-                       "first: lower-case\nrest: lower-case\nseparator: underscore"]
-   "lower-hyphen" [lower-case lower-case "-"
-                   "first: lower-case\nrest: lower-case\nseparator: dash"]})
+  (let [cptlz [capitalize "clojure.string/capitalize"]
+        lcase [lower-case "clojure.string/lower-case"]
+        ucase [upper-case "clojure.string/upper-case"]]
+    {"camel" [cptlz cptlz ""]
+     "camel-space" [cptlz cptlz " "]
+     "camel-underscore" [cptlz cptlz "_"]
+     "camel-hyphen" [cptlz cptlz "-"]
+     "mixed" [lcase cptlz ""]
+     "mixed-space" [lcase cptlz " "]
+     "mixed-underscore" [lcase cptlz "_"]
+     "mixed-hyphen" [lcase cptlz "-"]
+     "upper" [ucase ucase ""]
+     "upper-space" [ucase ucase " "]
+     "upper-underscore" [ucase ucase "_"]
+     "upper-hyphen" [ucase ucase "-"]
+     "lower" [lcase lcase ""]
+     "lower-space" [lcase lcase " "]
+     "lower-underscore" [lcase lcase "_"]
+     "lower-hyphen" [lcase lcase "-"]}))
 
-;;; DONE: Add docstring to generated functions.
-;;; DONE: The functions should take in an optional word-separator pattern.
+(defn- case-fn-doc [first-fn-name rest-fn-name separator]
+  (format "With one arg, splits s according to default word separation regex.
+  With two args, uses re instead of default word separation regex.
+  In both cases applies the functions listed below to the list of
+  split words and joins the results using the indicated separator:
+
+  first word:    %s
+  rest of words: %s
+  separator:     \"%s\"" first-fn-name rest-fn-name separator))
+
 ;;; TODO: We should expose a builder of word-separator patterns.
-(doseq [[case-label [first-fn rest-fn separator doc]] case-conversion-rules]
-  (intern *ns* (with-meta (symbol case-label)
-                 {:doc doc
-                  :arglists '([s] [s re])})
-          (fn thefn
-            ([s] (thefn s word-separator-pattern))
-            ([s re] (let [words (split s re)]
-                      (convert-case first-fn rest-fn separator words))))))
+(doseq [[case-label [[fst-fn fst-fn-name]
+                     [rest-fn rest-fn-name] sep]] case-conversion-rules]
+  (let [fn-doc (case-fn-doc fst-fn-name rest-fn-name sep)
+        fn-meta {:doc fn-doc :arglists '([s] [s re])}
+        fn-sym (with-meta (symbol case-label) fn-meta)
+        fn-impl (fn thefn
+                  ([s] (thefn s word-separator-pattern))
+                  ([s re] (let [words (split s re)]
+                            (convert-case fst-fn rest-fn sep words))))]
+    (intern *ns* fn-sym fn-impl)))
 
 ;;; TODO: Is this the correct thing to do?
 ;;; Ex: (alter-name :fooBar lower-hyphen) -> :foo-bar
