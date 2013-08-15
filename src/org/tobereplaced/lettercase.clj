@@ -68,11 +68,11 @@
 (doseq [[case-label [first-fn rest-fn separator doc]] case-conversion-rules]
   (intern *ns* (with-meta (symbol case-label)
                  {:doc doc
-                  :arglists '([s & re])})
-          (fn [s & [re]]
-            (let [words (split s (if re re word-separator-pattern))]
-              (convert-case first-fn rest-fn separator
-                          words)))))
+                  :arglists '([s] [s re])})
+          (fn thefn
+            ([s] (thefn s word-separator-pattern))
+            ([s re] (let [words (split s re)]
+                      (convert-case first-fn rest-fn separator words))))))
 
 ;;; TODO: Is this the correct thing to do?
 ;;; Ex: (alter-name :fooBar lower-hyphen) -> :foo-bar
