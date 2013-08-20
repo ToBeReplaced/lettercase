@@ -2,8 +2,8 @@
   "Declarative case conversion."
   (:require [clojure.string
              :refer [join split capitalize lower-case upper-case]]
-            [org.tobereplaced.lettercase.internal :refer [docstring]])
-  (:import [clojure.lang Keyword Symbol]))
+            [org.tobereplaced.lettercase.internal :refer [docstring]]
+            [org.tobereplaced.lettercase.protocols :as protocols]))
 
 (defn separator-pattern
   "Returns a composite pattern that can be used to break a string into
@@ -64,10 +64,18 @@
                :arglists '([s] [s re])})
             fn-impl)))
 
-;;; TODO: Create a variadic function for this.
-(defprotocol AlterName
-  (alter-name [this f] "Alters the name of this with f."))
+(defn alter-name
+  "Returns a new symbol or keyword by applying f to the name of x and
+  any additional args.
 
-(extend-protocol AlterName
-  Keyword (alter-name [this f] (->> this name f (keyword (namespace this))))
-  Symbol (alter-name [this f] (->> this name f (symbol (namespace this)))))
+  Example: (alter-name :foo/bar upper) => :foo/BAR"
+  [x f & args]
+  (protocols/alter-name x #(apply f % args)))
+
+(defn alter-namespace
+  "Returns a new symbol or keyword by applying f to the namespace of x
+  and any additional args.
+
+  Example: (alter-namespace :foo/bar upper) => :FOO/bar"
+  [x f & args]
+  (protocols/alter-namespace x #(apply f % args)))
