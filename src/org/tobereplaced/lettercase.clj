@@ -27,6 +27,7 @@
   "A map from case words to a pair with a function for its first word
   and function for the rest of its words."
   {:capitalized [capitalize capitalize]
+   :sentence [capitalize lower-case]
    :mixed [lower-case capitalize]
    :upper [upper-case upper-case]
    :lower [lower-case lower-case]})
