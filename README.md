@@ -27,7 +27,7 @@ This is alpha quality software.
 
 ## Documentation
 
-The [Codox API Documentation] is extensive and is the best way of understanding the library.  For working with strings, see the many conversion functions, like ```clojure lower-hyphen```.  For working with keywords or symbols, see the functions ```clojure alter-name``` and ```clojure alter-namespace```.
+The [Codox API Documentation] is extensive and is the best way of understanding the library.  For working with strings, see the many conversion functions, like `lower-hyphen`.  For working with keywords or symbols, see the functions `alter-name` and `alter-namespace`.
 
 ## TODO
 
