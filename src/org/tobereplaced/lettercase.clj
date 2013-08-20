@@ -5,23 +5,27 @@
             [org.tobereplaced.lettercase.internal :refer [docstring]])
   (:import [clojure.lang Keyword Symbol]))
 
-
-;;; TODO: Break out in to submatches.  Allow configuration of space,
-;;; uppercase, letter, number.
-(def ^:private word-separator-pattern
-  "A pattern that matches all known word separators."
-  (->> [;; Match any "space" character.
-        #"[\- _,/|]"
-        ;; Uppercase letter followed by uppercase and lowercase.
-        #"(?<=\p{Lu})(?=\p{Lu}[\p{L}&&[^\p{Lu}]])"
-        ;; Lowercase letter followed by uppercase letter.
-        #"(?<=[\p{L}&&[^\p{Lu}]])(?=\p{Lu})"
-        ;; Letter followed by number.  Ex: area51 -> area 51.
-        #"(?<=\p{L})(?=\p{N})"
-        ;; Number followed by letter
-        #"(?<=\p{N})(?=\p{L})"]
-       (join \|)
-       re-pattern))
+(defn separator-pattern
+  "Returns a composite pattern that can be used to break a string into
+  words.  The resulting pattern will match any space character, an
+  upper letter immediately followed by an upper letter immediately
+  followed by a lower letter, a lower letter immediately followed by
+  an upper letter, any letter immediately followed by a number, and
+  any number immediately followed by a number."
+  [& {:keys [space upper letter number]
+      :or {space #"[\- _,/|]"
+           upper #"\p{Lu}"
+           letter #"\p{L}"
+           number #"\p{N}"}}]
+  (let [lower (format "[%s&&[^%s]]" letter upper)
+        pair (fn [before after] (format "(?<=%s)(?=%s)" before after))]
+    (->> [space
+          (pair upper (str upper lower))
+          (pair lower upper)
+          (pair letter number)
+          (pair number letter)]
+         (join \|)
+         re-pattern)))
 
 (def ^:private case-functions
   "A map from case words to a pair with a function for its first word
@@ -41,9 +45,10 @@
 
 (doseq [[casing [first-fn rest-fn]] case-functions
         [spacing space-string] space-strings]
-  (let [fn-impl (fn impl
+  (let [default-separator-pattern (separator-pattern)
+        fn-impl (fn impl
                   ([s]
-                     (impl s word-separator-pattern))
+                     (impl s default-separator-pattern))
                   ([s re]
                      (let [[word & more] (split s re)]
                        (join space-string

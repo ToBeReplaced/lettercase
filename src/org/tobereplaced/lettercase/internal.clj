@@ -33,7 +33,7 @@
   (-> "Returns a new string by manipulating the lettercase of s.  %s Each
   word will be separated by \"%s\".  Word boundaries will be
   determined by re if provided, otherwise they will be determined by
-  the default word separation regex."
+  the default pattern returned by separator-pattern."
       (format (casing docstrings) space-string)
       clean-docstring
       (str \newline \newline
