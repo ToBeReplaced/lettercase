@@ -10,16 +10,16 @@
 (def ^:private word-separator-pattern
   "A pattern that matches all known word separators."
   (->> [;; Match any "space" character.
-        "[\\- _,/|]"
+        #"[\- _,/|]"
         ;; Uppercase letter followed by uppercase and lowercase.
-        "(?<=\\p{Lu})(?=\\p{Lu}[\\p{L}&&[^\\p{Lu}]])"
+        #"(?<=\p{Lu})(?=\p{Lu}[\p{L}&&[^\p{Lu}]])"
         ;; Lowercase letter followed by uppercase letter.
-        "(?<=[\\p{L}&&[^\\p{Lu}]])(?=\\p{Lu})"
+        #"(?<=[\p{L}&&[^\p{Lu}]])(?=\p{Lu})"
         ;; Letter followed by number.  Ex: area51 -> area 51.
-        "(?<=\\p{L})(?=\\p{N})"
+        #"(?<=\p{L})(?=\p{N})"
         ;; Number followed by letter
-        "(?<=\\p{N})(?=\\p{L})"]
-       (join "|")
+        #"(?<=\p{N})(?=\p{L})"]
+       (join \|)
        re-pattern))
 
 (defn- convert-case [first-fn rest-fn separator [word & more]]
