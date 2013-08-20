@@ -1,8 +1,9 @@
 (ns org.tobereplaced.lettercase
   "Declarative case conversion."
-  (:require (clojure (string :refer [join split capitalize
-                                     lower-case upper-case])))
-  (:import (clojure.lang Keyword Symbol)))
+  (:require [clojure.string
+             :refer [join split capitalize lower-case upper-case]]
+            [org.tobereplaced.lettercase.internal :refer [docstring]])
+  (:import [clojure.lang Keyword Symbol]))
 
 
 ;;; TODO: Break out in to submatches.  Allow configuration of space,
@@ -28,50 +29,38 @@
   for word separation."
   (join separator (cons (first-fn word) (map rest-fn more))))
 
-;;; TODO: Set up in loop to prevent mistakes
-(def ^:private case-conversion-rules
-  "The formatting rules for each case."
-  (let [cptlz [capitalize "clojure.string/capitalize"]
-        lcase [lower-case "clojure.string/lower-case"]
-        ucase [upper-case "clojure.string/upper-case"]]
-    {"capitalized" [cptlz cptlz ""]
-     "capitalized-space" [cptlz cptlz " "]
-     "capitalized-underscore" [cptlz cptlz "_"]
-     "capitalized-hyphen" [cptlz cptlz "-"]
-     "mixed" [lcase cptlz ""]
-     "mixed-space" [lcase cptlz " "]
-     "mixed-underscore" [lcase cptlz "_"]
-     "mixed-hyphen" [lcase cptlz "-"]
-     "upper" [ucase ucase ""]
-     "upper-space" [ucase ucase " "]
-     "upper-underscore" [ucase ucase "_"]
-     "upper-hyphen" [ucase ucase "-"]
-     "lower" [lcase lcase ""]
-     "lower-space" [lcase lcase " "]
-     "lower-underscore" [lcase lcase "_"]
-     "lower-hyphen" [lcase lcase "-"]}))
+(def ^:private case-functions
+  "A map from case words to a pair with a function for its first word
+  and function for the rest of its words."
+  {:capitalized [capitalize capitalize]
+   :mixed [lower-case capitalize]
+   :upper [upper-case upper-case]
+   :lower [lower-case lower-case]})
 
-(defn- case-fn-doc [first-fn-name rest-fn-name separator]
-  (format "With one arg, splits s according to default word separation regex.
-  With two args, uses re instead of default word separation regex.
-  In both cases applies the functions listed below to the list of
-  split words and joins the results using the indicated separator:
+(def ^:private space-strings
+  "A map from spacing words to their corresponding strings."
+  {:space " "
+   :underscore "_"
+   :hyphen "-"
+   nil ""})
 
-  first word:    %s
-  rest of words: %s
-  separator:     \"%s\"" first-fn-name rest-fn-name separator))
-
-;;; TODO: We should expose a builder of word-separator patterns.
-(doseq [[case-label [[fst-fn fst-fn-name]
-                     [rest-fn rest-fn-name] sep]] case-conversion-rules]
-  (let [fn-doc (case-fn-doc fst-fn-name rest-fn-name sep)
-        fn-meta {:doc fn-doc :arglists '([s] [s re])}
-        fn-sym (with-meta (symbol case-label) fn-meta)
-        fn-impl (fn thefn
-                  ([s] (thefn s word-separator-pattern))
-                  ([s re] (let [words (split s re)]
-                            (convert-case fst-fn rest-fn sep words))))]
-    (intern *ns* fn-sym fn-impl)))
+(doseq [[casing [first-fn rest-fn]] case-functions
+        [spacing space-string] space-strings]
+  (let [fn-impl (fn impl
+                  ([s]
+                     (impl word-separator-pattern s))
+                  ([re s]
+                     (convert-case first-fn rest-fn space-string (split s re))))
+        fn-symbol (->> [casing spacing]
+                       (remove nil?)
+                       (map name)
+                       (join "-")
+                       symbol)]
+    (intern *ns*
+            (with-meta fn-symbol
+              {:doc (docstring fn-symbol fn-impl casing space-string)
+               :arglists '([s] [re s])})
+            fn-impl)))
 
 ;;; TODO: Is this the correct thing to do?
 ;;; Ex: (alter-name :fooBar lower-hyphen) -> :foo-bar
