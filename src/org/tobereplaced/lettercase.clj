@@ -23,12 +23,6 @@
        (join \|)
        re-pattern))
 
-(defn- convert-case [first-fn rest-fn separator [word & more]]
-  "Converts the case of a string s according to the rule for the first
-  word, remaining words, and the separator. Optionally, accepts a pattern
-  for word separation."
-  (join separator (cons (first-fn word) (map rest-fn more))))
-
 (def ^:private case-functions
   "A map from case words to a pair with a function for its first word
   and function for the rest of its words."
@@ -48,9 +42,11 @@
         [spacing space-string] space-strings]
   (let [fn-impl (fn impl
                   ([s]
-                     (impl word-separator-pattern s))
-                  ([re s]
-                     (convert-case first-fn rest-fn space-string (split s re))))
+                     (impl s word-separator-pattern))
+                  ([s re]
+                     (let [[word & more] (split s re)]
+                       (join space-string
+                             (cons (first-fn word) (map rest-fn more))))))
         fn-symbol (->> [casing spacing]
                        (remove nil?)
                        (map name)
@@ -59,19 +55,13 @@
     (intern *ns*
             (with-meta fn-symbol
               {:doc (docstring fn-symbol fn-impl casing space-string)
-               :arglists '([s] [re s])})
+               :arglists '([s] [s re])})
             fn-impl)))
 
-;;; TODO: Is this the correct thing to do?
-;;; Ex: (alter-name :fooBar lower-hyphen) -> :foo-bar
+;;; TODO: Create a variadic function for this.
 (defprotocol AlterName
   (alter-name [this f] "Alters the name of this with f."))
 
 (extend-protocol AlterName
-  String (alter-name [this f] (-> this f))
-  Keyword (alter-name [this f] (-> this name f keyword))
-  Symbol (alter-name [this f] (-> this name f symbol)))
-
-(comment
-  ;; "foo-bar-is-baz-no-way-html"
-  (lower-hyphen "foo/barIsBaz,NoWayHTML"))
+  Keyword (alter-name [this f] (->> this name f (keyword (namespace this))))
+  Symbol (alter-name [this f] (->> this name f (symbol (namespace this)))))
