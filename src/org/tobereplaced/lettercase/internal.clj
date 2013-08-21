@@ -1,13 +1,11 @@
 (ns org.tobereplaced.lettercase.internal
-  (:require [clojure.string :refer [join split-lines trim trimr]]))
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :refer [resource]]
+            [clojure.string :refer [join split-lines trim trimr]]))
 
-(def ^:private docstrings
-  "A map from case words to corresponding documentation fragments."
-  {:capitalized "Each word will be capitalized."
-   :mixed "The first word will be converted to lowercase, and the rest will be
-  capitalized."
-   :upper "Each word will be converted to all uppercase letters."
-   :lower "Each word will be converted to all lowercase letters."})
+(def ^:private doc-fragments
+  "Documentation fragments."
+  (-> "doc-fragments.edn" resource slurp edn/read-string))
 
 (defn- clean-docstring
   "Cleans a clojure docstring by removing existing line breaks and
@@ -29,13 +27,9 @@
 
 (defn docstring
   "Returns a customized docstring for f with casings and space-string."
-  [fn-symbol fn-impl casing space-string]
-  (-> "Returns a new string by manipulating the lettercase of s.  %s Each
-  word will be separated by \"%s\".  Word boundaries will be
-  determined by re if provided, otherwise they will be determined by
-  the default pattern returned by separator-pattern."
-      (format (casing docstrings) space-string)
+  [fn-symbol fn-impl [casing spacing return-key] example]
+  (-> (join "  " ((juxt return-key casing spacing :boundaries) doc-fragments))
       clean-docstring
       (str \newline \newline
-           (format "  Example: (%s \"Foo the bar\") => \"%s\""
-                   fn-symbol (fn-impl "Foo the bar")))))
+           (format "  Example: (%s %s) => %s"
+                   fn-symbol (pr-str example) (pr-str (fn-impl example))))))
