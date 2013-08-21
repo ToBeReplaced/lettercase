@@ -28,7 +28,7 @@
 
  :name
  "Returns a string by manipulating the lettercase of the name of the
-  string, symbol, or keyword."
+  string, symbol, or keyword s."
 
  :symbol
  "Returns an unqualified symbol from the manipulated lettercase of
