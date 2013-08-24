@@ -1,4 +1,4 @@
-(defproject org.tobereplaced/lettercase "0.0.1-SNAPSHOT"
+(defproject org.tobereplaced/lettercase "1.0.0"
   :description "Declarative case conversion."
   :url "https://github.com/ToBeReplaced/lettercase"
   :license {:name "Eclipse Public License"
