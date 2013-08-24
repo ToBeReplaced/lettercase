@@ -1,8 +1,14 @@
-{:capitalized
+{
+ ;; Casing
+ :capitalized
  "Each word will be capitalized."
 
+ :sentence
+ "The first word will be capitalized and the rest will be converted
+  to lowercase."
+
  :mixed
- "The first word will be converted to lowercase, and the rest will be
+ "The first word will be converted to lowercase and the rest will be
   capitalized."
 
  :upper
@@ -11,6 +17,7 @@
  :lower
  "Each word will be converted to all lowercase letters."
 
+ ;; Spacing
  :no-separator
  "The words will not be separated."
 
@@ -23,6 +30,7 @@
  :hyphen
  "Each word will be separated by \\-."
 
+ ;; Return type
  :string
  "Returns a new string by manipulating the lettercase of the string s."
 
@@ -31,14 +39,14 @@
   string, symbol, or keyword s."
 
  :symbol
- "Returns an unqualified symbol from the manipulated lettercase of
-  the string s."
+ "Returns a symbol by manipulating the lettercase of the string s."
 
  :keyword
- "Returns an unqualified keyword from the manipulated lettercase of
-  the string s."
+ "Returns a keyword by manipulating the lettercase of the string s."
 
+ ;; Miscellaneous
  :boundaries
  "Word boundaries will be determined by re if provided, otherwise
   they will be determined by the default pattern returned by
-  separator-pattern."}
+  separator-pattern."
+}
