@@ -1,4 +1,5 @@
 (ns org.tobereplaced.lettercase.postgresql
+  "Declarative case conversion for working with PostgreSQL."
   (:require [org.tobereplaced.lettercase :refer [lower-underscore]]))
 
 (defn entities
