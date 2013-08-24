@@ -56,15 +56,18 @@
                                (fn [f]
                                  (fn
                                    ([s] (ctor (f s)))
-                                   ([s maybe-re]
-                                      (if (instance? Pattern maybe-re)
-                                        (ctor (f s maybe-re))
-                                        (ctor maybe-re (f s))))
+                                   ([x y]
+                                      (if (instance? Pattern y)
+                                        (ctor (f x y))
+                                        (ctor x (f y))))
                                    ([ns s re] (ctor ns (f s re))))))]
-    {:string ['([s] [s re]) identity]
-     :keyword ['([s] [s re] [ns s] [ns s re]) (symbol-or-keyword-fn keyword)]
+    {:keyword ['([s] [s re] [ns s] [ns s re]) (symbol-or-keyword-fn keyword)]
      :symbol ['([s] [s re] [ns s] [ns s re]) (symbol-or-keyword-fn symbol)]
-     :name ['([x] [x re]) #(comp % name)]}))
+     :name ['([x] [x re]) (fn [f]
+                            (fn
+                              ([x] (f (name x)))
+                              ([x re] (f (name x) re))))]
+     :string ['([s] [s re]) identity] }))
 
 (doseq
     [[casing [first-fn rest-fn]] case-functions
