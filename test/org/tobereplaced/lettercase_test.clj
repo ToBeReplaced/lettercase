@@ -3,7 +3,8 @@
             [org.tobereplaced.lettercase
              :refer [lower lower-space lower-hyphen lower-underscore
                      lower-hyphen-keyword lower-hyphen-symbol lower-hyphen-name
-                     capitalized-space sentence-space mixed-space upper-space]])
+                     capitalized-space sentence-space mixed-space upper-space
+                     alter-name alter-namespace]])
   (:import [clojure.lang ArityException]))
 
 (deftest separator-pattern-stress-test
@@ -69,6 +70,26 @@
         "should return a converted string of the name of the keyword")
     (is (= (lower-hyphen-name x #"The") "foo-bar")
         "should accept an optional separator pattern")))
+
+(deftest alter-name-test
+  (is (= (alter-name :foo/Bar lower) :foo/bar)
+      "should alter the name of qualified keywords")
+  (is (= (alter-name 'foo/Bar lower) 'foo/bar)
+      "should alter the name of qualified symbols")
+  (is (= (alter-name :Bar lower) :bar)
+      "should alter the name of unqualified keywords")
+  (is (= (alter-name 'Bar lower) 'bar)
+      "should alter the name of unqualified symbols"))
+
+(deftest alter-namespace-test
+  (is (= (alter-namespace :Foo/bar lower) :foo/bar)
+      "should alter the namespace of qualified keywords")
+  (is (= (alter-namespace 'Foo/bar lower) 'foo/bar)
+      "should alter the namespace of qualified symbols")
+  (is (= (alter-namespace :bar identity) :bar)
+      "should alter the namespace of unqualified keywords")
+  (is (= (alter-namespace 'bar identity) 'bar)
+      "should alter the namespace of unqualified symbols"))
 
 (deftest bad-arity-text
   (is (thrown? ArityException (lower "foo-bar" #"-" :extra-arg))))
