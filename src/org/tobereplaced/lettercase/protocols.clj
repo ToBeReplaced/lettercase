@@ -5,7 +5,6 @@
   (alter-name [this f] "Alters the name of this with f."))
 
 (extend-protocol AlterName
-  String (alter-name [this f] (f this))
   Keyword (alter-name [this f] (->> this name f (keyword (namespace this))))
   Symbol (alter-name [this f] (->> this name f (symbol (namespace this)))))
 

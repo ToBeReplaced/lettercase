@@ -95,8 +95,8 @@
           fn-impl))
 
 (defn alter-name
-  "Returns a new symbol, keyword, or string by applying f to the name
-  of x and any additional args.
+  "Returns a new symbol or keyword by applying f to the name of x and
+  any additional args.
 
   Example: (alter-name :foo/bar upper) => :foo/BAR"
   [x f & args]
