@@ -1,5 +1,25 @@
 (ns org.tobereplaced.lettercase
-  "Declarative case conversion."
+  "Declarative case conversion.
+
+  The main functions in this namespace operate on strings and are
+  named according to:
+
+  (case-method)-(optional-separator)-(optional-return-type).
+
+  The implemented case-methods include capitalize, sentence, mixed,
+  upper, and lower.  The implemented separators include space, hyphen,
+  and underscore, defaulting to nothing.  The implemented return types
+  include symbol and keyword, defaulting to string.
+
+  The functions suffixed by \"name\" can be used similarly to the core
+  clojure function with case manipulation.
+
+  All of the above functions accept an optional regular expression
+  pattern to match word-separators.  See \"separator-pattern\" for
+  help constructing more complicated patterns.
+
+  If you are working with keywords or symbols, see the \"alter-name\"
+  and \"alter-namespace\" functions."
   (:require [clojure.string
              :refer [join split capitalize lower-case upper-case]]
             [org.tobereplaced.lettercase.internal :refer [docstring]]
