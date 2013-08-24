@@ -28,7 +28,7 @@
 (defn docstring
   "Returns a customized docstring for f with casings and space-string."
   [fn-symbol fn-impl [casing spacing return-key]]
-  (let [example (if (= return-key :name) ":Foo-the-Bar" "Foo the Bar")]
+  (let [example (if (= return-key :name) :Foo-the-Bar "Foo the Bar")]
     (-> (join "  " ((juxt return-key casing spacing :boundaries) doc-fragments))
         clean-docstring
         (str \newline \newline
