@@ -1,4 +1,5 @@
 (ns org.tobereplaced.lettercase.protocols
+  "The Alter* protocols."
   (:import [clojure.lang Keyword Symbol]))
 
 (defprotocol AlterName
