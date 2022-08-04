@@ -51,4 +51,4 @@ Distributed under the Eclipse Public License, the same as Clojure. The license c
 [camel-snake-kebab]: https://github.com/qerub/camel-snake-kebab
 [Clojars]: http://clojars.org/org.tobereplaced/lettercase
 [Semantic Versioning]: http://semver.org
-[Codox API Documentation]: http://ToBeReplaced.github.com/lettercase
+[Codox API Documentation]: http://ToBeReplaced.github.io/lettercase
